@@ -1,32 +1,28 @@
 import React from 'react'
 import PropTypes from 'prop-types';
-import classnames from 'classnames';
-
 import { decorate, observable } from 'mobx';
 import { observer } from 'mobx-react';
+
+import TextField from '@material-ui/core/TextField';
+
+const style = {
+	display: 'flex'
+};
 
 class TextInput extends React.Component {
 
     title;
-
     constructor(props) {
         super(props);
         this.title = this.props.title || '';
     }
 
-    handleBlur = (e) => {
-        if(!this.props.newTodo) {
-            this.props.onSave(e.target.value);
-        }
-    }
-
     handleSubmit = (e) => {
         const title = e.target.value.trim();
         if(e.which === 13) {
+            console.log('inside');
             this.props.onSave(title);
-            if(this.props.newTodo) {
-                this.title = '';
-            }
+			this.title = '';
         }
     };
 
@@ -35,23 +31,20 @@ class TextInput extends React.Component {
     };
 
     render() {
-        const { placeholder, editing, newTodo } = this.props;
+        const { placeholder } = this.props;
         return (
-            <input
-                className = { classnames({
-                    edit: editing,
-                    'new-todo': newTodo
-                }) }
-                type = 'text'
-                placeholder = { placeholder }
-                autoFocus = 'true'
-                value = { this.title }
-                onBlur = { this.handleBlur }
-                onChange = { this.handleChange }
-                onKeyDown = { this.handleSubmit }
-            />
-        )
-      }
+			<div style = { style }>
+				<TextField
+					helperText = { placeholder }
+					fullWidth = { true }
+                    value = { this.title }
+					onChange = { this.handleChange }
+					onKeyDown = { this.handleSubmit }
+				>
+				</TextField>
+			</div>
+		)
+	}
 };
 
 const TodoTextInput = decorate(observer(TextInput), {
@@ -59,11 +52,9 @@ const TodoTextInput = decorate(observer(TextInput), {
 });
 
 TodoTextInput.propTypes = {
-    newTodo: PropTypes.bool,
     onSave: PropTypes.func.isRequired,
     placeholder: PropTypes.string,
-    title: PropTypes.string,
-    editing: PropTypes.bool
+    title: PropTypes.string
 };
 
 export default TodoTextInput;

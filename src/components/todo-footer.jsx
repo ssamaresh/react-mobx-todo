@@ -1,69 +1,104 @@
 import React from 'react'
 import PropTypes from 'prop-types';
-import classnames from 'classnames';
-
 import { observer } from 'mobx-react';
+import { SortTwoTone } from '@material-ui/icons';
+import MenuItem from '@material-ui/core/MenuItem';
+import IconButton from '@material-ui/core/IconButton';
+import Menu from '@material-ui/core/Menu';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
 
-import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS, FILTER_TITLES } from '../constants';
+import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS, FILTER_TITLES} from '../constants';
+import { decorate, observable } from 'mobx';
+
+const toolbarStyle = {
+    display: 'flex',
+    justifyContent: 'space-between'
+};
 
 class TodoFooter extends React.Component {
+
+    anchorEl = null;
 
     renderTodoCount = () => {
         const { todoStore } = this.props;
         const activeCount = todoStore.todos.length - todoStore.completedTodoCount;
         const itemWord = activeCount === 1 ? 'item ' : 'items ';
         return (
-            <span className = 'todo-count'>
-                <strong>{ activeCount || 'No ' } { itemWord } left</strong>
-            </span>
-        );
-    };
-
-    renderFilterLink = filter => {
-        const { todoStore } = this.props;
-        const title = FILTER_TITLES[filter];
-        return (
-            <a
-                className = { classnames({ selected: filter ===  todoStore.filter }) }
-                style = { { cursor: 'pointer' } }
-                onClick = { () =>  todoStore.setFilter(filter) }
-            >
-                { title }
-            </a>
+            <Typography>
+                { activeCount > 0 ? `${ activeCount } ${ itemWord } left` : 'No item left' }
+            </Typography>
         )
     };
 
     renderClearButton = () => {
         const { todoStore } = this.props;
-        if (todoStore.completedCount > 0) {
-            return (
-                <button
-                    className = 'clear-completed'
-                    onClick = { () => todoStore.clearCompleted() }
-                >
-                    Clear completed
-                </button>
-            )
-        }
+        return (
+            <Button
+                variant = 'contained'
+                color = 'secondary'
+                disabled = { todoStore.completedTodoCount === 0 }
+                onClick = { () => todoStore.clearCompleted() }
+            >
+                Clear Completed
+            </Button>
+        )
+    };
+
+    handleFilterChange = (e, index, value) => {
+        const { todoStore } = this.props;
+        todoStore.setFilter(value);
+    };
+
+    handleMenu = event => {
+        console.log(event.currentTarget);
+        this.anchorEl = event.currentTarget;
+    };
+
+    handleClose = () => {
+        this.anchorEl = null;
     };
 
     render() {
         const filters = [ ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS ];
+        const { todoStore } = this.props;
+        const open = Boolean(this.anchorEl);
         return(
             <footer className = 'footer'>
-                { this.renderTodoCount() }
-                <ul className = 'filters'>
-                    { 
-                        filters.map(filter => {
-                            return(
-                                <li key = { filter }>
-                                    { this.renderFilterLink(filter) }
-                                </li>
-                            )
-                        })
-                    }
-                </ul>
-                { this.renderClearButton() }
+                <Toolbar style = { toolbarStyle }>
+                    { this.renderTodoCount() }
+                    <div style = { {'display': 'flex', 'flex-direction': 'row'} }>
+                        <IconButton
+                            aria-owns = { open ? 'menu-appbar' : null }
+                            aria-haspopup = 'true'
+                            onClick = { this.handleMenu }
+                            color = 'inherit'
+                        >
+                            <SortTwoTone />
+                        </IconButton>
+                        <Menu
+                            anchorEl = { this.anchorEl }
+                            open = { open }
+                            onClose = { this.handleClose }
+                        >
+                            { 
+                                filters.map(filter => {
+                                    return(
+                                        <MenuItem
+                                            key = { filter }
+                                            // value = { filter }
+                                            onClick = { this.handleFilterChange }
+                                        >
+                                            { FILTER_TITLES[filter] }
+                                        </MenuItem>
+                                    );
+                                })
+                            }
+                        </Menu>
+                    </div>
+                    { this.renderClearButton() }
+                </Toolbar>
             </footer>
         );
     }
@@ -73,4 +108,6 @@ TodoFooter.propTypes = {
     todoStore: PropTypes.object.isRequired
 };
 
-export default observer(TodoFooter);
+export default decorate(observer(TodoFooter), {
+    anchorEl: observable
+});
