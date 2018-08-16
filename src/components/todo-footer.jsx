@@ -46,13 +46,13 @@ class TodoFooter extends React.Component {
         )
     };
 
-    handleFilterChange = (e, index, value) => {
+    handleFilterChange = filter => {
         const { todoStore } = this.props;
-        todoStore.setFilter(value);
+        this.handleClose();
+        todoStore.setFilter(filter);
     };
 
     handleMenu = event => {
-        console.log(event.currentTarget);
         this.anchorEl = event.currentTarget;
     };
 
@@ -62,13 +62,12 @@ class TodoFooter extends React.Component {
 
     render() {
         const filters = [ ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS ];
-        const { todoStore } = this.props;
         const open = Boolean(this.anchorEl);
         return(
             <footer className = 'footer'>
                 <Toolbar style = { toolbarStyle }>
                     { this.renderTodoCount() }
-                    <div style = { {'display': 'flex', 'flex-direction': 'row'} }>
+                    <div style = { {'display': 'flex', 'flexDirection': 'row'} }>
                         <IconButton
                             aria-owns = { open ? 'menu-appbar' : null }
                             aria-haspopup = 'true'
@@ -87,8 +86,7 @@ class TodoFooter extends React.Component {
                                     return(
                                         <MenuItem
                                             key = { filter }
-                                            // value = { filter }
-                                            onClick = { this.handleFilterChange }
+                                            onClick = { () => this.handleFilterChange(filter) }
                                         >
                                             { FILTER_TITLES[filter] }
                                         </MenuItem>
@@ -96,8 +94,8 @@ class TodoFooter extends React.Component {
                                 })
                             }
                         </Menu>
+                        { this.renderClearButton() }
                     </div>
-                    { this.renderClearButton() }
                 </Toolbar>
             </footer>
         );

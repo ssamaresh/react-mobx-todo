@@ -20,7 +20,6 @@ class TextInput extends React.Component {
     handleSubmit = (e) => {
         const title = e.target.value.trim();
         if(e.which === 13) {
-            console.log('inside');
             this.props.onSave(title);
 			this.title = '';
         }
